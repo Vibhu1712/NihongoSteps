@@ -1,0 +1,100 @@
+# Builds Nihongo Steps in the cloud with GitHub Actions.
+#
+# Every push (or "Run workflow" on the Actions tab) produces:
+#   • nihongo-steps-debug-apk        – installable test APK (always)
+#   • nihongo-steps-release          – signed APK + AAB for Google Play
+#                                      (only when the signing secrets below exist)
+# Publishing a GitHub Release also attaches the APK to that release page.
+#
+# Signing secrets (Settings → Secrets and variables → Actions → New repository secret):
+#   KEYSTORE_BASE64    upload-keystore.jks encoded as base64          (required)
+#   KEYSTORE_PASSWORD  keystore password                              (required)
+#   KEY_ALIAS          key alias        – optional, defaults to "upload"
+#   KEY_PASSWORD       key password     – optional, defaults to KEYSTORE_PASSWORD
+
+name: Build APK
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write # only used to attach the APK to a GitHub Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v6
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Build debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v6
+        with:
+          name: nihongo-steps-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+
+      - name: Restore signing key
+        if: env.HAS_KEYSTORE == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || 'upload' }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || secrets.KEYSTORE_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode --ignore-garbage > upload-keystore.jks
+          printf 'storeFile=../upload-keystore.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "$STORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > keystore.properties
+
+      - name: Build signed release APK + AAB
+        if: env.HAS_KEYSTORE == 'true'
+        run: ./gradlew assembleRelease bundleRelease --stacktrace
+
+      - name: Upload release APK + AAB
+        if: env.HAS_KEYSTORE == 'true'
+        uses: actions/upload-artifact@v6
+        with:
+          name: nihongo-steps-release
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Attach APK to GitHub Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          if [ "$HAS_KEYSTORE" = "true" ]; then
+            cp app/build/outputs/apk/release/app-release.apk "NihongoSteps-$TAG.apk"
+          else
+            cp app/build/outputs/apk/debug/app-debug.apk "NihongoSteps-$TAG-debug.apk"
+          fi
+          gh release upload "$TAG" NihongoSteps-*.apk --clobber --repo "$GITHUB_REPOSITORY"
+
+      - name: Remove signing files
+        if: always()
+        run: rm -f upload-keystore.jks keystore.properties

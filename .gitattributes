@@ -1,0 +1,6 @@
+# Keep the Unix launcher script runnable on GitHub's Linux builders even when committed from Windows.
+gradlew text eol=lf
+*.bat text eol=crlf
+*.jar binary
+*.ttf binary
+*.png binary
