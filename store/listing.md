@@ -45,10 +45,10 @@ Education
 Japanese, hiragana, katakana, kanji, JLPT N5, language learning
 
 ## Contact email
-<your support email>
+Via GitHub — https://github.com/Vibhu1712
 
 ## Privacy policy URL
-<URL where you host store/privacy_policy.md, e.g. GitHub Pages>
+https://vibhu1712.github.io/NihongoSteps/
 
 ## Screenshots to capture (phone, min 2, recommended 4–8, 1080×1920 or similar)
 1. Learn tab (level bar + daily goal ring)

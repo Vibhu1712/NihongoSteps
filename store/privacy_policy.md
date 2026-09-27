@@ -1,8 +1,8 @@
 # Privacy Policy — Nihongo Steps
 
-_Last updated: <date>_
+_Last updated: September 27, 2026_
 
-Nihongo Steps ("the app") is developed by <your name / developer name>.
+Nihongo Steps ("the app") is developed by EduAdvaitApps.
 
 **The app does not collect, store on any server, or share any personal data.**
 
@@ -24,4 +24,4 @@ all ages.
 
 Changes to this policy will be posted at this URL.
 
-Contact: <your support email>
+Contact: via GitHub — https://github.com/Vibhu1712
