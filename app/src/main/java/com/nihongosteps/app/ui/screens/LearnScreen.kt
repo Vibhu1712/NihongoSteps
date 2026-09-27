@@ -53,6 +53,9 @@ fun LearnScreen(open: (String) -> Unit) {
     ) {
         item { TodayHeader(progress) }
         item { Spacer(Modifier.height(4.dp)) }
+        if (progress.xp == 0 && progress.completedLessons.isEmpty() && progress.writtenChars.isEmpty()) {
+            item { WelcomeCard(onClick = { open(Routes.FAQ) }) }
+        }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 ScriptCard("あ", Script.HIRAGANA, progress, Modifier.weight(1f)) { open(Routes.kana(Script.HIRAGANA)) }
@@ -70,6 +73,30 @@ fun LearnScreen(open: (String) -> Unit) {
         }
         item {
             PathCard("訳", "Translate", "Turn ${SentenceData.tasks.size} English sentences into Japanese, tile by tile") { open(Routes.TRANSLATE) }
+        }
+    }
+}
+
+@Composable
+private fun WelcomeCard(onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.secondaryContainer,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(
+                "New to Japanese?",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Read a two-minute introduction to hiragana, katakana and kanji before you start.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
         }
     }
 }

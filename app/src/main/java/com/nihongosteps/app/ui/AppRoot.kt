@@ -27,6 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.nihongosteps.app.data.Script
+import com.nihongosteps.app.ui.screens.FaqScreen
 import com.nihongosteps.app.ui.screens.GrammarDetailScreen
 import com.nihongosteps.app.ui.screens.GrammarListScreen
 import com.nihongosteps.app.ui.screens.KanaChartScreen
@@ -59,6 +60,7 @@ object Routes {
     const val GAME_KANA = "game/kana"
     const val GAME_VOCAB = "game/vocab"
     const val GAME_MATCH = "game/match"
+    const val FAQ = "faq"
 }
 
 @Composable
@@ -99,7 +101,7 @@ fun AppRoot() {
             composable("write") { WriteScreen(startChar = null, onBack = null) }
             composable("practice/{char}") { e -> WriteScreen(startChar = e.arguments?.getString("char"), onBack = { nav.popBackStack() }) }
             composable("play") { PlayScreen(open = { nav.navigate(it) }) }
-            composable("me") { MeScreen() }
+            composable("me") { MeScreen(openFaq = { nav.navigate(Routes.FAQ) }) }
 
             composable("kana/{script}") { e ->
                 val script = runCatching { Script.valueOf(e.arguments?.getString("script") ?: "") }.getOrDefault(Script.HIRAGANA)
@@ -118,6 +120,7 @@ fun AppRoot() {
             composable(Routes.GAME_KANA) { KanaQuizScreen(onBack = { nav.popBackStack() }) }
             composable(Routes.GAME_VOCAB) { VocabQuizScreen(onBack = { nav.popBackStack() }) }
             composable(Routes.GAME_MATCH) { MatchGameScreen(onBack = { nav.popBackStack() }) }
+            composable(Routes.FAQ) { FaqScreen(onBack = { nav.popBackStack() }) }
         }
     }
 }

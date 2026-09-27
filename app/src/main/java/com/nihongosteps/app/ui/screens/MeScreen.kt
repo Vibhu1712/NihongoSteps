@@ -55,7 +55,7 @@ private const val PRIVACY = "Nihongo Steps does not collect, store or share any 
     "Questions: contact the developer through the Google Play listing."
 
 @Composable
-fun MeScreen() {
+fun MeScreen(openFaq: () -> Unit = {}) {
     val app = LocalApp.current
     val context = LocalContext.current
     val progress by rememberProgress()
@@ -142,6 +142,7 @@ fun MeScreen() {
         item { Header("About") }
         item {
             Column {
+                TextButton(onClick = openFaq) { Text("Help & FAQ") }
                 TextButton(onClick = { dialog = "privacy" }) { Text("Privacy policy") }
                 TextButton(onClick = { dialog = "licenses" }) { Text("Open-source licences") }
                 TextButton(onClick = { dialog = "reset" }) { Text("Reset progress", color = LocalExtraColors.current.wrong) }
